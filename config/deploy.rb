@@ -1,6 +1,6 @@
 
 
-server 35.154.86.56, port: 80, roles: [:web, :app, :db], primary: true
+server '35.154.86.56', port: 22, roles: [:web, :app, :db], primary: true
 
 set :repo_url,        'git@github.com:djshikha/pumasetup.git'
 set :application,     'pumasetup'
@@ -15,11 +15,11 @@ set :stage,           :production
 set :deploy_via,      :remote_cache
 #set :deploy_to,       "/home/#{fetch(:user)}/apps/#{fetch(:application)}"
 set :deploy_to,       "/var/www/pumasetup"
-set :puma_bind,       "unix://#{shared_path}/tmp/sockets/#{fetch(:application)}-puma.sock"
-set :puma_state,      "#{shared_path}/tmp/pids/puma.state"
-set :puma_pid,        "#{shared_path}/tmp/pids/puma.pid"
-set :puma_access_log, "#{release_path}/log/puma.error.log"
-set :puma_error_log,  "#{release_path}/log/puma.access.log"
+set :puma_bind,       "unix:///var/www/pumasetup/shared/tmp/sockets/#{fetch(:application)}-puma.sock"
+set :puma_state,      "/var/www/pumasetup/shared/tmp/pids/puma.state"
+set :puma_pid,        "/var/www/pumasetup/shared/tmp/pids/puma.pid"
+set :puma_access_log, "/var/www/pumasetup/shared/log/puma.error.log"
+set :puma_error_log,  "/var/www/pumasetup/shared/log/puma.access.log"
 set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: "~/Downloads/djpuma.pem" }
 set :puma_preload_app, true
 set :puma_worker_timeout, nil
@@ -40,8 +40,8 @@ namespace :puma do
   desc 'Create Directories for Puma Pids and Socket'
   task :make_dirs do
     on roles(:app) do
-      execute "mkdir #{shared_path}/tmp/sockets -p"
-      execute "mkdir #{shared_path}/tmp/pids -p"
+      execute "mkdir /var/www/pumasetup/shared/tmp/sockets -p"
+      execute "mkdir /var/www/pumasetup/shared/tmp/pids -p"
     end
   end
 
