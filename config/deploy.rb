@@ -1,6 +1,6 @@
 
 
-server '35.154.86.56', port: 22, roles: [:web, :app, :db], primary: true
+server '13.126.158.45', roles: [:web, :app, :db], primary: true
 
 set :repo_url,        'git@github.com:djshikha/pumasetup.git'
 set :application,     'pumasetup'
@@ -10,17 +10,17 @@ set :puma_workers,    0
 
 # Don't change these unless you know what you're doing
 set :pty,             true
-set :use_sudo,        false
+set :use_sudo,        true
 set :stage,           :production
 set :deploy_via,      :remote_cache
 #set :deploy_to,       "/home/#{fetch(:user)}/apps/#{fetch(:application)}"
 set :deploy_to,       "/var/www/pumasetup"
-set :puma_bind,       "unix:///var/www/pumasetup/shared/tmp/sockets/#{fetch(:application)}-puma.sock"
+set :puma_bind,       "unix://var/www/pumasetup/shared/tmp/sockets/#{fetch(:application)}-puma.sock"
 set :puma_state,      "/var/www/pumasetup/shared/tmp/pids/puma.state"
 set :puma_pid,        "/var/www/pumasetup/shared/tmp/pids/puma.pid"
 set :puma_access_log, "/var/www/pumasetup/shared/log/puma.error.log"
 set :puma_error_log,  "/var/www/pumasetup/shared/log/puma.access.log"
-set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: "~/Downloads/djpuma.pem" }
+set :ssh_options,     { forward_agent: true, user: fetch(:user), keys: "~/Downloads/pumanginx.pem" }
 set :puma_preload_app, true
 set :puma_worker_timeout, nil
 set :puma_init_active_record, true  # Change to false when not using ActiveRecord
@@ -35,6 +35,7 @@ set :puma_init_active_record, true  # Change to false when not using ActiveRecor
 ## Linked Files & Directories (Default None):
 # set :linked_files, %w{config/database.yml}
 # set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
+set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system')
 
 namespace :puma do
   desc 'Create Directories for Puma Pids and Socket'
@@ -68,17 +69,18 @@ namespace :deploy do
     end
   end
 
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      invoke 'puma:restart'
-    end
-  end
+  # I assume you are using the capistrano3-puma gem. That gem automatically restarts puma for you at the conclusion of a successful deployment. So that is the first time the restart task is being called
+  #desc 'Restart application'
+  #task :restart do
+   # on roles(:app), in: :sequence, wait: 5 do
+    #  invoke 'puma:restart'
+    #end
+  #end
 
   before :starting,     :check_revision
   after  :finishing,    :compile_assets
   after  :finishing,    :cleanup
-  after  :finishing,    :restart
+  #after  :finishing,    :restart
 end
 
 # ps aux | grep puma    # Get puma pid
